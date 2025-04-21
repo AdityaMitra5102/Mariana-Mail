@@ -6,10 +6,10 @@ import uuid
 app = Flask(__name__, static_url_path="/static")
 
 idend='.mariana'
-
+filename='/etc/marianamail/users.db'
 # DB setup
 def init_db():
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(filename)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS emails (recipient TEXT, sender TEXT, subject TEXT, body TEXT)''')
@@ -19,13 +19,13 @@ def init_db():
 init_db()
 
 def validate_id(id):
-	if not id.endswith(idend):
-		return False
-	try:
-		uuid.UUID(id[:-len(idend)])
-		return True
-	except:
-		return False
+        if not id.endswith(idend):
+                return False
+        try:
+                uuid.UUID(id[:-len(idend)])
+                return True
+        except:
+                return False
 
 @app.route('/')
 def home():
@@ -36,7 +36,7 @@ def check_user():
     username = request.args.get('username')
     if not validate_id(username):
         return "Invalid request"
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(filename)
     c = conn.cursor()
     c.execute('SELECT * FROM users WHERE username = ?', (username,))
     exists = c.fetchone() is not None
@@ -51,7 +51,7 @@ def login():
     password = request.args.get('password')
     hashed = hashlib.sha256(password.encode()).hexdigest()
 
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(filename)
     c = conn.cursor()
     c.execute('SELECT * FROM users WHERE username = ?', (username,))
     row = c.fetchone()
@@ -67,14 +67,14 @@ def login():
         c.execute('INSERT INTO users VALUES (?,?)', (username, hashed))
         conn.commit()
         return redirect(url_for('inbox', username=username))
-        
+
 @app.route('/inbox')
 def inbox():
     username = request.args.get('username')
     if not validate_id(username):
         return "Invalid request"
-    
-    conn = sqlite3.connect('users.db')
+
+    conn = sqlite3.connect(filename)
     c = conn.cursor()
     c.execute('SELECT sender, subject, body FROM emails WHERE recipient = ?', (username,))
     emails = c.fetchall()
@@ -91,10 +91,10 @@ def compose():
 
     subject=request.args.get('sub', '')
     bodyx=request.args.get('body', '')
-    
+
     print(bodyx)
-        
-    
+
+
     return render_template('compose.html', username=username, to=to, subject=subject, bodyx=bodyx)
 
 @app.route('/send')
@@ -110,12 +110,12 @@ def send():
     subject = request.args.get('subject')
     body = request.args.get('body')
 
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(filename)
     c = conn.cursor()
     c.execute('INSERT INTO emails VALUES (?, ?, ?, ?)', (recipient, sender, subject, body))
     conn.commit()
     conn.close()
     return redirect(url_for('inbox', username=sender))
 
-if __name__=='__mail__':
-	app.run(host='0.0.0.0', port=5000)
+if __name__=='__main__':
+        app.run(host='0.0.0.0', port=5000)
