@@ -117,4 +117,5 @@ def send():
     conn.close()
     return redirect(url_for('inbox', username=sender))
 
-app.run(host='0.0.0.0', port=5000)
+if __name__=='__mail__':
+	app.run(host='0.0.0.0', port=5000)
