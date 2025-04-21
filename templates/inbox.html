@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inbox</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<h1>Mariana Email</h1>
+<div class="email-app">
+    <div class="sidebar">
+        <h2>Inbox</h2>
+        <button onclick="location.href='/compose?username={{ username }}'">Compose</button>
+        <ul id="email-list">
+            {% for mail in emails %}
+            <li onclick="showEmail({{ loop.index0 }})">
+                <strong>{{ mail[0] }}</strong><br>
+                <strong>{{ mail[1] }}</strong><br>
+                <span>{{ mail[2] }}</span><br>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+<div class="main-view">
+    <h3 id="email-subject">Select an email</h3>
+    <p><strong>From:</strong> <span id="email-sender">-</span></p>
+    <p><strong>Message:</strong></p>
+    <pre id="email-body"></pre>
+
+    <div id="email-actions" style="margin-top: 20px; display: none;">
+        <button onclick="replyEmail()">Reply</button>
+        <button onclick="forwardEmail()">Forward</button>
+    </div>
+</div>
+</div>
+
+<script>
+    const emails = {{ emails|tojson }};
+    let currentMail = null;
+
+console.log(emails);
+
+    function showEmail(index) {
+        const mail = emails[index];
+        currentMail = mail;
+
+        document.getElementById("email-subject").textContent = mail[1];
+        document.getElementById("email-sender").textContent = mail[0];
+        document.getElementById("email-body").textContent = mail[2];
+        document.getElementById("email-actions").style.display = "block";
+    }
+
+    function replyEmail() {
+        if (currentMail) {
+            const recipient = encodeURIComponent(currentMail[0]);
+            const subject = encodeURIComponent("Re: " + currentMail[1]);
+            const body = encodeURIComponent("\n\n---- Original Message ----\n" + currentMail[2]);
+            location.href = `/compose?username={{username}}&to=${recipient}&sub=${subject}&body=${body}`;
+        }
+    }
+
+    function forwardEmail() {
+        if (currentMail) {
+            const subject = encodeURIComponent("Fwd: " + currentMail[1]);
+            const body = encodeURIComponent("---- Forwarded Message ----\nFrom: " + currentMail[0] + "\n\n" + currentMail[2]);
+            location.href = `/compose?username={{username}}&sub=${subject}&body=${body}`;
+        }
+    }
+</script>
+</body>
+</html>

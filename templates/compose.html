@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Compose</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<h1>Mariana Email</h1>
+  <h2>Compose Email</h2>
+  <form method="get" action="/send">
+    <input type="hidden" name="username" value="{{ username }}">
+    <label>To:</label>
+    <input type="text" name="to" value="{{to}}" required><br>
+    <label>Subject:</label>
+    <input type="text" name="subject" value="{{subject}}" required><br>
+    <label>Message:</label><br>
+    <textarea name="body" rows="6" cols="40" required>{{bodyx}}</textarea><br>
+    <button type="submit">Send</button>
+  </form>
+  <br>
+  <a href="/inbox?username={{ username }}">Back to Inbox</a>
+</body>
+</html>
