@@ -43,12 +43,12 @@ def check_user():
     conn.close()
     return {'exists': exists}
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    username = request.args.get('username')
+    username = request.form.get('username')
     if not validate_id(username):
         return "Invalid request"
-    password = request.args.get('password')
+    password = request.form.get('password')
     hashed = hashlib.sha256(password.encode()).hexdigest()
 
     conn = sqlite3.connect(filename)
